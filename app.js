@@ -142,13 +142,14 @@ client.on('webSessionID', function(sessionid) {
         // No longer appear offline
 
         client.setPersonaState(steam.EPersonaState.Online)
-        //client.setPersonaName('NerdPing | Zeus')
+        // client.setPersonaName('NerdPing | Zeus')
         //inviteToNerdping('76561197976771998')
     })
 })
 
-function inviteToNerdping(steamid) {
-  client.groupInvite('103582791436565054', steamid)
+function inviteToGroup(groupid,steamid) {
+  // client.groupInvite('103582791436565054', steamid)
+  client.groupInvite(groupid, steamid)
   console.log('Invited ' + steamid);
 }
 
@@ -156,11 +157,12 @@ var steamids = []
 var groupsteamids = []
 
 app.post('/invitefriends', function(req, res) {
+  var toGroup = req.body.groupid
     request('https://steamcommunity.com/id/' + req.body.id + "/friends/?xml=1", function (error, response, body){
       if(!error && response.statusCode == 200) {
         $ = cheerio.load(body, { xmlMode: true });
         $('friend').each(function (i, element) {
-          inviteToNerdping($(this).text())
+          inviteToGroup(toGroup, $(this).text())
         })
       }
       req.flash('info', 'Successfully invited from friends list.')
@@ -168,11 +170,12 @@ app.post('/invitefriends', function(req, res) {
     })
 })
 app.post('/invitegroup', function(req, res) {
+  var toGroup = req.body.groupid
     request('https://steamcommunity.com/groups/' + req.body.id + '/memberslistxml?xml=1', function (error, response, body) {
       if(!error && response.statusCode == 200) {
         $ = cheerio.load(body, { xmlMode: true });
         $('steamID64').each(function (i, element) {
-          inviteToNerdping($(this).text())
+          inviteToGroup(toGroup, $(this).text())
         })
       }
       req.flash('info', 'Successfully invited from group members list.')
